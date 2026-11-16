@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GIWA Launchpad — built with the Ammora SDK</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>GIWA Launchpad</h1>
+    <p class="sub">Token launchpad on <b>GIWA Sepolia</b> (chain 91342) · built with <code>@ammora-protocol/sdk@0.3.9</code> · testnet only, no real money.</p>
+    <p id="rpcStatus" class="muted">Connecting to RPC…</p>
+    <p id="verifyStatus" class="muted">Verifying deployment…</p>
+  </div>
+  <div class="wallet-box">
+    <button id="connectBtn" data-keep-enabled="1">Connect Wallet (MetaMask)</button>
+    <div id="walletPanel" style="display:none">
+      <p>ETH: <b id="ethBalance">…</b> · WETH: <b id="wethBalance">…</b></p>
+      <div class="wrap-row">
+        <input id="wrapAmount" type="number" min="0" step="0.0001" placeholder="ETH to wrap">
+        <button id="wrapBtn" data-needs-wallet>Wrap → WETH</button>
+      </div>
+      <p id="wrapTx" class="muted"></p>
+      <p class="muted small">Buys use WETH. Wrapping is a separate on-chain transaction you approve in your wallet.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button id="tabbtn-launches" class="active">Launches</button>
+  <button id="tabbtn-create">Create Launch</button>
+  <button id="tabbtn-configs">My Configs</button>
+  <span id="busy" class="muted"></span>
+</nav>
+
+<main>
+  <section id="tab-launches">
+    <div class="toolbar">
+      <input id="searchInput" type="search" placeholder="Search by name, symbol, token or curve address…">
+      <button id="refreshBtn">Refresh</button>
+      <span id="launchStatus" class="muted"></span>
+    </div>
+    <div id="launchList" class="grid"></div>
+
+    <div id="detail" class="detail" style="display:none">
+      <div class="detail-head">
+        <h2 id="detailTitle"></h2>
+        <button id="closeDetailBtn">Close</button>
+      </div>
+      <p id="detailMeta" class="muted"></p>
+      <div id="detailState"></div>
+      <div class="trade">
+        <label>Buy with WETH
+          <input id="buyAmount" type="number" min="0" step="0.0001" placeholder="e.g. 0.001">
+        </label>
+        <label>Sell tokens
+          <input id="sellAmount" type="number" min="0" step="1" placeholder="token amount">
+        </label>
+        <div class="trade-btns">
+          <button id="buyBtn" data-needs-wallet>Buy</button>
+          <button id="sellBtn" data-needs-wallet>Sell</button>
+          <button id="migrateBtn" data-needs-wallet style="display:none">Migrate (graduate)</button>
+        </div>
+        <p id="tradeHint" class="muted"></p>
+        <div id="quoteBox" class="quote"></div>
+        <div id="tradeStatus" class="status"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-create" style="display:none">
+    <h2>Create a launch</h2>
+    <p class="muted">Issues a new token + bonding curve (ALC) on an existing Config. The Config decides the curve, fees and graduation. You pay only gas — the pool creation fee on template Configs is 0. You are the token Creator.</p>
+    <div class="form">
+      <label>Config ID <input id="launchConfigId" type="number" min="1" placeholder="e.g. 6 (template) or your own Config #"></label>
+      <label>Token name <input id="launchName" type="text" placeholder="e.g. My Launch Token" maxlength="64"></label>
+      <label>Token symbol <input id="launchSymbol" type="text" placeholder="e.g. MLT" maxlength="16"></label>
+      <label>Metadata URI <input id="launchMeta" type="text" placeholder="ipfs://… or https://…/token.json"></label>
+      <p class="muted small">Decimals are fixed by the Config (template #6 uses 9). The launch is immutable once created.</p>
+      <button id="createLaunchBtn" data-needs-wallet>Create launch</button>
+      <div id="launchResult" class="status"></div>
+    </div>
+  </section>
+
+  <section id="tab-configs" style="display:none">
+    <h2>My Configs</h2>
+    <p class="muted">A Config is a reusable, immutable policy (supply, curve, fees, graduation, recipients) derived from reviewed template #6. One Config can launch many tokens. Creating a Config costs only gas.</p>
+    <div class="form">
+      <label>Partner (fee) recipient <input id="cfgPartner" type="text" placeholder="defaults to your wallet"></label>
+      <label>Liquidity partner <input id="cfgLp" type="text" placeholder="defaults to your wallet"></label>
+      <label>Leftover receiver <input id="cfgLeftover" type="text" placeholder="defaults to your wallet"></label>
+      <label>Sale supply (tokens) <input id="cfgSaleSupply" type="number" min="1" value="1000000"></label>
+      <label>Graduation threshold (WETH) <input id="cfgThreshold" type="number" min="0" step="0.001" value="1"></label>
+      <div class="form-btns">
+        <button id="previewConfigBtn" data-needs-wallet>Preview Config</button>
+        <button id="createConfigBtn" data-needs-wallet disabled>Create Config</button>
+      </div>
+      <div id="cfgPreview" class="quote"></div>
+      <div id="cfgResult" class="status"></div>
+    </div>
+    <h3>Configs created in this browser</h3>
+    <div id="myConfigs"></div>
+  </section>
+</main>
+
+<footer>
+  <p class="muted small">
+    GIWA Launchpad is an independent demo built with the Ammora SDK. It is not affiliated with or endorsed by Ammora.
+    Ammora contracts are beta testnet software with no independent security audit. $tAMM and launched tokens are testnet
+    assets with no monetary value. Always review the exact transaction in your wallet before signing. Source:
+    <a href="https://github.com/ammora-labs/ammora-protocol" target="_blank" rel="noreferrer">ammora-labs/ammora-protocol</a>.
+  </p>
+</footer>
+
+<div id="toasts"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
